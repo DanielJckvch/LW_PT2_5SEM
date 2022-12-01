@@ -1,0 +1,84 @@
+The list of person zodiac signs.
+
+
+Name:Joe
+Surname:Smith
+Zodiac sign:Sagittarius
+Date of birth:9.8.1988
+
+Name:Gans
+Surname:Wenn
+Zodiac sign:Sagittarius
+Date of birth:8.8.1988
+
+Name:XXX
+Surname:YYY
+Zodiac sign:Aries
+Date of birth:10.3.2007
+
+
+
+Name:QQQ
+Surname:LLL
+Zodiac sign:Cancer
+Date of birth:31.7.1949
+
+
+Name:Joe
+Surname:Smith
+Zodiac sign:Sagittarius
+Date of birth:8.10.2022
+
+Name:XXX
+Surname:YYY
+Zodiac sign:Aries
+Date of birth:10.3.2120
+
+
+
+Name:QQQ
+Surname:LLL
+Zodiac sign:Cancer
+Date of birth:3.2.1280
+
+Name:Joe
+Surname:Smith
+Zodiac sign:Sagittarius
+Date of birth:10.8.1988
+
+Name:Gans
+Surname:Wenn
+Zodiac sign:Sagittarius
+Date of birth:8.8.1978
+
+Name:XXX
+Surname:YYY
+Zodiac sign:Aries
+Date of birth:10.3.2007
+
+
+
+Name:QQQ
+Surname:LLL
+Zodiac sign:Cancer
+Date of birth:31.7.1955
+
+
+Name:Joe
+Surname:Smith
+Zodiac sign:Sagittarius
+Date of birth:8.10.1998
+
+Name:XXX
+Surname:YYY
+Zodiac sign:Aries
+Date of birth:10.3.2100
+
+
+
+Name:QQQ
+Surname:LLL
+Zodiac sign:Cancer
+Date of birth:3.2.1900
+
+

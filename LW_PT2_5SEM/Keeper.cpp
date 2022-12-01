@@ -161,15 +161,24 @@ void keeper::show(void)
 	place* p = head;
 	while (p->next != nullptr)
 	{
-		p->note->show(cout);
+		cout << *(p->note);
 		p = p->next;
 	}
 }
-
 void keeper::search(char* s, int f)
 {
 	place* p = head;
 	int found = 0;
+	char* auxS;
+	try
+	{
+		auxS = new char[FIELDSIZE];
+	}
+	catch (bad_alloc)
+	{
+		cout << "Error of the operator \"new\"" << endl;
+		exit(-1);
+	}
 	if (!amount)
 	{
 		int er = 1;
@@ -183,7 +192,7 @@ void keeper::search(char* s, int f)
 			if (!strcmp(p->note->get(0), s))
 			{
 				found = 1;
-				p->note->show(cout);
+				cout << *(p->note);
 				break;
 			}
 			break;
@@ -191,7 +200,7 @@ void keeper::search(char* s, int f)
 			if (!strcmp(p->note->get(1), s))
 			{
 				found = 1;
-				p->note->show(cout);
+				cout << *(p->note);
 				break;
 			}
 			break;
@@ -199,7 +208,7 @@ void keeper::search(char* s, int f)
 			if (!strcmp(p->note->get(2), s))
 			{
 				found = 1;
-				p->note->show(cout);
+				cout << *(p->note);
 				break;
 			}
 			break;
@@ -222,11 +231,10 @@ void keeper::search(int perVal, int perNum)
 	}
 	while (p->next)
 	{
-
 		if (p->note->getDate(perNum) == perVal)
 		{
 			found = 1;
-			p->note->show(cout);
+			cout << *(p->note);
 		}
 		p = p->next;
 	}
@@ -246,6 +254,49 @@ void keeper::clear(void)
 		amount = amount - 1;
 	}
 	head->prev = nullptr;
+}
+void keeper::sort(void)
+{
+	place* p = head;
+	place* p1 = nullptr;
+	unsigned prev = 0;
+	bool exit = false;
+	while (p->next != nullptr)
+	{
+		p->note->countDays();
+		p = p->next;
+	}
+	while (!exit)
+	{
+		exit = true;
+		p = head;
+		p1 = head->next;
+		int j = 1;
+		while (p1->next != nullptr)
+		{
+
+			if (p->note->days < p1->note->days) // если текущий элемент меньше предыдущего
+			{
+				//Обмен
+				copy(j + 1, j);
+				del(j + 2);
+				exit = false;
+			}
+			j++;
+			p = (*this)[j];
+			p1 = (*this)[j+1];
+		}
+	}
+}
+place* keeper::operator[](int i)
+{
+	i--;
+	place* p = head;
+	while (i--)
+	{
+		p = p->next;
+	}
+	return p;
 }
 keeper::keeper()
 {
@@ -280,7 +331,6 @@ keeper::keeper(const keeper &toCopy)
 {
 	cout << "Calling the copy constructor in the \"Keeper\" class" << endl;
 	place* ob_p = toCopy.tail->prev;
-	sign* p;
 	try
 	{
 		head = tail = new place;
@@ -324,13 +374,83 @@ ostream& operator<<(ostream& stream, const keeper& cont)
 	while (p->next != nullptr)
 	{
 		stream << "Person " << i << ':' << endl;
-		p->note->show(stream);
+		stream << *(p->note);
 		p = p->next;
 		i++;
 	}
 	return stream;
 }
-/*
+istream& operator>>(istream& stream, keeper& cont)
+{
+	int insMode = 0;
+	int insPos = 0;
+	sign* g_ptr = nullptr;
+	char buffErr[] = "Error of the input buffer";
+	try
+	{
+		g_ptr = new sign;
+	}
+	catch (bad_alloc)
+	{
+		cout << "Error of the operator \"new\"" << endl;
+		exit(-1);
+	}
+	try
+	{
+		for (int i = 0; i < 6; i++)
+		{
+			i >> *(g_ptr);
+		}
+	}
+	catch (int)
+	{
+		cout << "Entered uncorrect date." << endl;
+		delete g_ptr;
+		return stream;
+	}
+	cout << endl;
+	cout << "Enter a mean of insert: 0 - at head, 1 - at certain position, 2 - at end." << endl;
+	try
+	{
+		cin >> insMode;
+		if (cin.bad() || cin.fail())
+		{
+			throw buffErr;
+		}
+	}
+	catch (char*)
+	{
+		exit(1);
+	}
+	switch (insMode)
+	{
+	case 0:
+		cont.add(g_ptr);
+		break;
+	case 1:
+		cout << "Enter a position of the insetred note: " << endl;
+		try
+		{
+			cin >> insPos;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+		}
+		catch (char*)
+		{
+			exit(1);
+		}
+		cont.insert(insPos, g_ptr);
+		break;
+	case 2:
+		cont.addToEnd(g_ptr);
+		break;
+	}
+	
+	return stream;
+}
+
 void keeper::loadToFile(char* name)
 {
 	ofstream file(name, ios::out | ios::trunc);
@@ -339,7 +459,7 @@ void keeper::loadToFile(char* name)
 		cout << "File opening error" << endl;
 		return;
 	}
-	file << "The list of vehicles." << endl;
+	file << "The list of person zodiac signs." << endl;
 	file << "\n\n";
 	place* p = tail->prev;
 	char* s;
@@ -353,7 +473,7 @@ void keeper::loadToFile(char* name)
 	}
 	while (p != nullptr)
 	{
-		p->note->show(file);
+		file << *(p->note);
 		p = p->prev;
 	}
 	file.close();
@@ -371,12 +491,15 @@ void keeper::loadFromFile(char* name)
 	this->clear();
 	sign* g_ptr = nullptr;
 	char t = 0;
+	char sp = 0;
+	short date[3] = { 0 };
 	char buffErr[] = "Error of the input buffer";
 	char incData[] = "Another type of data";
-	short motoF = 0;
-	short autoF = 0;
+	short perF = 0;
+	short digF = 0;
 	short busF = 0;
 	char* pos = 0;
+	char* numPos = 0;
 	char* s;
 	char* lows;
 	char** fields;
@@ -403,160 +526,21 @@ void keeper::loadFromFile(char* name)
 		_strlwr(lows);
 		try
 		{
-			if (strstr(lows, "motorcycle") != 0)
+			
+			if ((pos = strstr(lows, "name")) != NULL && strstr(lows, "surname") == NULL)
 			{
-				if (t)
-				{
-					throw 'm';
-				}
-				g_ptr = new motorcycle;
-				t = 'm';
 
-			}
-			else if (strstr(lows, "automobile") != 0)
-			{
-				if (t)
-				{
-					throw 'a';
-				}
-				g_ptr = new sign;
-				t = 'a';
-			}
-			else if (strstr(lows, "bus") != 0)
-			{
 				if (t)
 				{
 					throw 'b';
 				}
-				g_ptr = new bus;
-				t = 'b';
-				/*
-				try
+				g_ptr = new sign;
+				t = 1;
+				if (perF == 0)
 				{
-					while (file)
-					{
-						file.getline(s, AUXSTRLEN);
-						strcpy(lows, s);
-						_strlwr(lows);
-						if ((pos = strstr(lows, "name")) != NULL)
-						{
-							fieldMode = 0;
-							pos = s + (lows - pos) + 5;
-						}
-						else if ((pos = strstr(lows, "surname")) != NULL)
-						{
-							fieldMode = 1;
-							pos = s + (lows - pos) + 6;
-						}
-
-						else
-						{
-							throw fieldMode;
-						}
-						strcpy(fields[fieldMode], pos);
-					}
+					perF = 1;
 				}
-				catch (char* errField)
-				{
-					cout << "Data for the bus is partially missing\n" << endl;
-					if (fields[0][0] == 0)
-					{
-						cout << "Enter a new name: " << endl;
-						try
-						{
-							cin >> fields[0];
-							if (cin.bad() || cin.fail())
-							{
-								throw buffErr;
-							}
-						}
-						catch (char*)
-						{
-							exit(1);
-						}
-					}
-					if (fields[1][0] == 0)
-					{
-						cout << "Enter a new surname: " << endl;
-						try
-						{
-							cin >> fields[1];
-							if (cin.bad() || cin.fail())
-							{
-								throw buffErr;
-							}
-						}
-						catch (char*)
-						{
-							exit(1);
-						}
-					}
-					if (fields[2][0] == 0)
-					{
-						cout << "Enter a new total number of passengers: " << endl;
-						try
-						{
-							cin >> fields[2];
-							if (cin.bad() || cin.fail())
-							{
-								throw buffErr;
-							}
-						}
-						catch (char*)
-						{
-							exit(1);
-						}
-					}
-					if (fields[3][0] == 0)
-					{
-						cout << "Enter a new number of seats: " << endl;
-						try
-						{
-							cin >> fields[3];
-							if (cin.bad() || cin.fail())
-							{
-								throw buffErr;
-							}
-						}
-						catch (char*)
-						{
-							exit(1);
-						}
-					}
-					if (fields[4][0] == 0)
-					{
-						cout << "Enter a new terminal point: " << endl;
-						try
-						{
-							cin >> fields[4];
-							if (cin.bad() || cin.fail())
-							{
-								throw buffErr;
-							}
-						}
-						catch (char*)
-						{
-							exit(1);
-						}
-					}
-				}
-
-			}
-			else if ((pos = strstr(lows, "name")) != NULL)
-			{
-				if (motoF == 0 && t == 'm')
-				{
-					motoF = 1;
-				}
-				else if (autoF == 0 && t == 'a')
-				{
-					autoF = 1;
-				}
-				else if (busF == 0 && t == 'b')
-				{
-					busF = 1;
-				}
-				else 
+				else
 				{
 					throw incData;
 				}
@@ -565,38 +549,22 @@ void keeper::loadFromFile(char* name)
 			}
 			else if ((pos = strstr(lows, "surname")) != NULL)
 			{
-				if (motoF == 1 && t == 'm')
+				if (perF == 1)
 				{
-					motoF = 2;
-				}
-				else  if (autoF == 1 && t == 'a')
-				{
-					autoF = 2;
-				}
-				else if (busF == 1 && t == 'b')
-				{
-					busF = 2;
+					perF = 2;
 				}
 				else 
 				{
 					throw incData;
 				}
-				pos = s + (lows - pos) + 6;
+				pos = s + (lows - pos) + 8;
 				strcpy(fields[1], pos);
 			}
-			else if ((pos = strstr(lows, "engine size")) != NULL)
+			else if ((pos = strstr(lows, "zodiac sign")) != NULL)
 			{
-				if (t == 'b'&&!t)
+				if (perF == 2)
 				{
-					throw incData;
-				}
-				if (motoF == 2 && t == 'm')
-				{
-					motoF = 3;
-				}
-				else if (autoF == 2 && t == 'a')
-				{
-					autoF = 3;
+					perF = 3;
 				}
 				else
 				{
@@ -605,160 +573,73 @@ void keeper::loadFromFile(char* name)
 				pos = s + (lows - pos) + 12;
 				strcpy(fields[2], pos);
 			}
-			else if ((pos = strstr(lows, "engine capability")) != NULL)
+			else if ((pos = strstr(lows, "date of birth")) != NULL)
 			{
-				if (t != 'm'&&t)
+				if (perF == 3)
 				{
-					throw incData;
-				}
-				if (motoF == 3)
-				{
-					motoF = 4;
+					perF = 0;
 				}
 				else
 				{
 					throw incData;
 				}
-				pos = s + (lows - pos) + 18;
-				strcpy(fields[3], pos);
-			}
-			else if ((pos = strstr(lows, "terrain")) != NULL)
-			{
-				if (t != 'm'&&t)
-				{
-					throw incData;
-				}
-				if (motoF == 4)
-				{
-					motoF = 0;
-				}
-				else
-				{
-					throw incData;
-				}
-				pos = s + (lows - pos) + 8;
+				pos = s + (lows - pos) + 14;
 				t = 0;
-				strcpy(fields[4], pos);
-				g_ptr->set(fields[0], fields[1], fields[2], fields[3], fields[4]);
+				numPos = pos;
+				for (int i = 0;i < 3;)
+				{
+					if (isdigit(*(numPos)))
+					{
+						digF=1;
+					}
+					else if (digF)
+					{
+						digF = 0;
+						sp = *numPos;
+						*numPos = '\0';
+						date[i] = atoi(pos);
+						*numPos = sp;
+						pos = numPos + 1;
+						i++;
+					}
+					else if (*numPos == '\0')
+					{
+						perF = i + 3;
+						throw t;
+					}
+					numPos++;
+				}
+				if (date[0] < 1 || date[0]>31 || date[1] < 1 || date[1]>12 || date[2] < 0)
+				{
+					throw incData;
+				}
+				g_ptr->set(fields[0], fields[1], fields[2], date[0], date[1], date[2]);
 				this->addToEnd(g_ptr);
 				g_ptr = nullptr;
 				for (int i = 0;i < 5;i++)
 				{
 					memset(fields[i], 0, FIELDSIZE);
 				}
-			}
-			else if ((pos = strstr(lows, "colour")) != NULL)
-			{
-				if (t != 'a' && t)
+				for (int i = 0;i < 3;i++)
 				{
-					throw incData;
-				}
-				if (autoF == 3 && t == 'a')
-				{
-					autoF = 4;
-				}
-				else if (t == 'a')
-				{
-					throw incData;
-				}
-				pos = s + (lows - pos) + 7;
-				strcpy(fields[3], pos);
-			}
-			else if ((pos = strstr(lows, "transmission type")) != NULL)
-			{
-				if (t != 'a' && t)
-				{
-					throw incData;
-				}
-				if (autoF == 4 && t == 'a')
-				{
-					autoF = 0;
-				}
-				else
-				{
-					throw incData;
-				}
-				pos = s + (lows - pos) + 18;
-				t = 0;
-				strcpy(fields[4], pos);
-				g_ptr->set(fields[0], fields[1], fields[2], fields[3], fields[4]);
-				this->addToEnd(g_ptr);
-				g_ptr = nullptr;
-				for (int i = 0;i < 5;i++)
-				{
-					memset(fields[i], 0, FIELDSIZE);
+					date[i] = 0;
 				}
 			}
-			else if ((pos = strstr(lows, "total number of passengers")) != NULL)
-			{
-				if (t != 'b' && t)
-				{
-					throw incData;
-				}
-				if (busF == 2 && t == 'b')
-				{
-					busF = 3;
-				}
-				else if (t == 'b')
-				{
-					throw incData;
-				}
-				pos = s + (lows - pos) + 27;
-				strcpy(fields[2], pos);
-			}
-			else if ((pos = strstr(lows, "number of seats")) != NULL)
-			{
-				if (t != 'b' && t)
-				{
-					throw incData;
-				}
-				if (busF == 3 && t == 'b')
-				{
-					busF = 4;
-				}
-				else
-				{
-					throw incData;
-				}
-				pos = s + (lows - pos) + 16;
-				strcpy(fields[3], pos);
-			}
-			else if ((pos = strstr(lows, "terminal point")) != NULL)
-			{
-				if (t != 'b' && t)
-				{
-					throw incData;
-				}
-				if (busF == 4 && t == 'b')
-				{
-					busF = 0;
-				}
-				else
-				{
-					throw incData;
-				}
-				pos = s + (lows - pos) + 15;
-				t = 0;
-				strcpy(fields[4], pos);
-				g_ptr->set(fields[0], fields[1], fields[2], fields[3], fields[4]);
-				this->addToEnd(g_ptr);
-				g_ptr = nullptr;
-				for (int i = 0;i < 5;i++)
-				{
-					memset(fields[i], 0, FIELDSIZE);
-				}
-			}
+			
+			
 		}
 		catch(char* er)
 		{
 			cout << er << endl;
-			motoF = 0;
-			autoF = 0;
-			busF = 0;
+			perF = 0;
 			t = 0;
 			for (int i = 0;i < 5;i++)
 			{
 				memset(fields[i], 0, FIELDSIZE);
+			}
+			for (int i = 0;i < 3;i++)
+			{
+				date[i] = 0;
 			}
 			if (g_ptr)
 			{
@@ -767,307 +648,266 @@ void keeper::loadFromFile(char* name)
 			}
 			
 		}
-		catch (char newCl)
+		catch (char dig)
 		{
 
 			cout << "This object is missing part of the data: " << endl;
 			cout << endl;
-			switch (*(g_ptr->get(0)))
-			{
-			case 'm':
-				cout << "Motorcycle" << endl;
-				if (fields[0][0]) { cout << "Mark:" << fields[0] << endl; }
-				if (fields[1][0]) { cout << "Model:" << fields[1] << endl; }
-				if (fields[2][0]) { cout << "Engine size:" << fields[2] << endl; }
-				if (fields[3][0]) { cout << "Engine capability:" << fields[3] << endl; }
-				if (fields[4][0]) { cout << "Terrain:" << fields[4] << endl; }
-				break;
-			case 'a':
-				cout << "Automobile" << endl;
-				if (fields[0][0]) { cout << "Mark:" << fields[0] << endl; }
-				if (fields[1][0]) { cout << "Model:" << fields[1] << endl; }
-				if (fields[2][0]) { cout << "Engine size:" << fields[2] << endl; }
-				if (fields[3][0]) { cout << "Colour:" << fields[3] << endl; }
-				if (fields[4][0]) { cout << "Transmission type:" << fields[4] << endl; }
-				break;
-			case 'b':
-				cout << "Bus" << endl;
-				if (fields[0][0]) { cout << "Mark:" << fields[0] << endl; }
-				if (fields[1][0]) { cout << "Model:" << fields[1] << endl; }
-				if (fields[2][0]) { cout << "Total number of passengers:" << fields[2] << endl; }
-				if (fields[3][0]) { cout << "Number of seats:" << fields[3] << endl; }
-				if (fields[4][0]) { cout << "Terminal point:" << fields[4] << endl; }
-				break;
-			}
+			if (fields[0][0]) { cout << "Name:" << fields[0] << endl; }
+			if (fields[1][0]) { cout << "Surname:" << fields[1] << endl; }
+			if (fields[2][0]) { cout << "Zodiac sign:" << fields[2] << endl; }
+			if (date[0]) { cout << "Day of birth:" << date[0] << endl; }
+			if (date[1]) { cout << "Month of birth:" << date[1] << endl; }
 			cout << endl;
 			cout << "You can fill in the data: " << endl;
 			cout << endl;
-			switch (*(g_ptr->get(0)))
+			switch (perF)
 			{
-			case 'm':
-				switch (motoF)
+			case 0:
+				cout << "Enter a new name: " << endl;
+				try
 				{
-				case 0:
-					cout << "Enter a new name: " << endl;
-					try
+					cin >> fields[0];
+					if (cin.bad() || cin.fail())
 					{
-						cin >> fields[0];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 1:
-					cout << "Enter a new surname: " << endl;
-					try
-					{
-						cin >> fields[1];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 2:
-					cout << "Enter a new engine size: " << endl;
-					try
-					{
-						cin >> fields[2];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 3:
-					cout << "Enter a new engine capability: " << endl;
-					try
-					{
-						cin >> fields[3];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 4:
-					cout << "Enter a new terrain for the motorcycle: " << endl;
-					try
-					{
-						cin >> fields[4];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
+						throw buffErr;
 					}
 				}
-				motoF = 0;
-				g_ptr->set(fields[0], fields[1], fields[2], fields[3], fields[4]);
-				this->add(g_ptr);
-				for (int i = 0;i < 5;i++)
+				catch (char*)
 				{
-					memset(fields[i], 0, FIELDSIZE);
+					exit(1);
 				}
-				break;
-			case 'a':
-				switch (autoF)
+			case 1:
+				cout << "Enter a new surname: " << endl;
+				try
 				{
-				case 0:
-					cout << "Enter a new name: " << endl;
-					try
+					cin >> fields[1];
+					if (cin.bad() || cin.fail())
 					{
-						cin >> fields[0];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 1:
-					cout << "Enter a new surname: " << endl;
-					try
-					{
-						cin >> fields[1];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 2:
-					cout << "Enter a new engine size: " << endl;
-					try
-					{
-						cin >> fields[2];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 3:
-					cout << "Enter a new colour: " << endl;
-					try
-					{
-						cin >> fields[3];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 4:
-					cout << "Enter a new transmission type: " << endl;
-					try
-					{
-						cin >> fields[4];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
+						throw buffErr;
 					}
 				}
-				autoF = 0;
-				g_ptr->set(fields[0], fields[1], fields[2], fields[3], fields[4]);
-				this->add(g_ptr);
-				for (int i = 0;i < 5;i++)
+				catch (char*)
 				{
-					memset(fields[i], 0, FIELDSIZE);
+					exit(1);
 				}
-				break;
-			case 'b':
-				switch (busF)
+			case 2:
+				cout << "Enter a new zodiac sign: " << endl;
+				try
 				{
-				case 0:
-					cout << "Enter a new name: " << endl;
-					try
+					cin >> fields[2];
+					if (cin.bad() || cin.fail())
 					{
-						cin >> fields[0];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 1:
-					cout << "Enter a new surname: " << endl;
-					try
-					{
-						cin >> fields[1];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 2:
-					cout << "Enter a new total number of passengers: " << endl;
-					try
-					{
-						cin >> fields[2];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 3:
-					cout << "Enter a new number of seats: " << endl;
-					try
-					{
-						cin >> fields[3];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
-					}
-				case 4:
-					cout << "Enter a new terminal point: " << endl;
-					try
-					{
-						cin >> fields[4];
-						if (cin.bad() || cin.fail())
-						{
-							throw buffErr;
-						}
-					}
-					catch (char*)
-					{
-						exit(1);
+						throw buffErr;
 					}
 				}
-				busF = 0;
-				g_ptr->set(fields[0], fields[1], fields[2], fields[3], fields[4]);
-				this->add(g_ptr);
-				for (int i = 0;i < 5;i++)
+				catch (char*)
 				{
-					memset(fields[i], 0, FIELDSIZE);
+					exit(1);
 				}
-				break;
+			case 3:
+				cout << "Enter a new day of birth: " << endl;
+				try
+				{
+					cin >> date[0];
+					if (cin.bad() || cin.fail())
+					{
+						throw buffErr;
+					}
+				}
+				catch (char*)
+				{
+					exit(1);
+				}
+			case 4:
+				cout << "Enter a new month of birth: " << endl;
+				try
+				{
+					cin >> date[1];
+					if (cin.bad() || cin.fail())
+					{
+						throw buffErr;
+					}
+				}
+				catch (char*)
+				{
+					exit(1);
+				}
+			case 5:
+				cout << "Enter a new year of birth: " << endl;
+				try
+				{
+					cin >> date[2];
+					if (cin.bad() || cin.fail())
+					{
+						throw buffErr;
+					}
+				}
+				catch (char*)
+				{
+					exit(1);
+				}
 			}
-			switch (newCl)
+			if (!(date[0] < 1 || date[0]>31 || date[1] < 1 || date[1]>12 || date[2] < 0))
 			{
-			case 'm':
-				g_ptr = new motorcycle;
-				t = 'm';
-				break;
-			case 'a':
+				g_ptr->set(fields[0], fields[1], fields[2], date[0], date[1], date[2]);
+				this->addToEnd(g_ptr);
+			}
+			else
+			{
+				cout << "Entered uncorrect date" << endl;
+				delete g_ptr;
+				g_ptr = nullptr;
+			}
+			
+			for (int i = 0;i < 5;i++)
+			{
+				memset(fields[i], 0, FIELDSIZE);
+			}
+			for (int i = 0;i < 3;i++)
+			{
+				date[i] = 0;
+			}
+			if (dig)
+			{
 				g_ptr = new sign;
-				t = 'a';
-				break;
-			case 'b':
-				g_ptr = new bus;
-				t = 'b';
-				break;
+				pos = s + (lows - pos) + 5;
+				strcpy(fields[0], pos);
+				perF = 1;
 			}
+			else
+			{
+				perF = 0;
+			}
+			
+			
 		}
 		
+	}
+	if (perF)
+	{
+
+		cout << "This object is missing part of the data: " << endl;
+		cout << endl;
+		if (fields[0][0]) { cout << "Name:" << fields[0] << endl; }
+		if (fields[1][0]) { cout << "Surname:" << fields[1] << endl; }
+		if (fields[2][0]) { cout << "Zodiac sign:" << fields[2] << endl; }
+		if (date[0]) { cout << "Day of birth:" << date[0] << endl; }
+		if (date[1])
+		{
+			cout << "Month of birth:" << date[1] << endl;
+			perF = 5;
+		}
+		cout << endl;
+		cout << "You can fill in the data: " << endl;
+		cout << endl;
+		switch (perF)
+		{
+		case 0:
+			cout << "Enter a new name: " << endl;
+			try
+			{
+				cin >> fields[0];
+				if (cin.bad() || cin.fail())
+				{
+					throw buffErr;
+				}
+			}
+			catch (char*)
+			{
+				exit(1);
+			}
+		case 1:
+			cout << "Enter a new surname: " << endl;
+			try
+			{
+				cin >> fields[1];
+				if (cin.bad() || cin.fail())
+				{
+					throw buffErr;
+				}
+			}
+			catch (char*)
+			{
+				exit(1);
+			}
+		case 2:
+			cout << "Enter a new zodiac sign: " << endl;
+			try
+			{
+				cin >> fields[2];
+				if (cin.bad() || cin.fail())
+				{
+					throw buffErr;
+				}
+			}
+			catch (char*)
+			{
+				exit(1);
+			}
+		case 3:
+			cout << "Enter a new day of birth: " << endl;
+			try
+			{
+				cin >> date[0];
+				if (cin.bad() || cin.fail())
+				{
+					throw buffErr;
+				}
+			}
+			catch (char*)
+			{
+				exit(1);
+			}
+		case 4:
+			cout << "Enter a new month of birth: " << endl;
+			try
+			{
+				cin >> date[1];
+				if (cin.bad() || cin.fail())
+				{
+					throw buffErr;
+				}
+			}
+			catch (char*)
+			{
+				exit(1);
+			}
+		case 5:
+			cout << "Enter a new year of birth: " << endl;
+			try
+			{
+				cin >> date[2];
+				if (cin.bad() || cin.fail())
+				{
+					throw buffErr;
+				}
+			}
+			catch (char*)
+			{
+				exit(1);
+			}
+		}
+		perF = 0;
+		if (!(date[0] < 1 || date[0]>31 || date[1] < 1 || date[1]>12 || date[2] < 0))
+		{
+			g_ptr->set(fields[0], fields[1], fields[2], date[0], date[1], date[2]);
+			this->addToEnd(g_ptr);
+		}
+		else
+		{
+			cout << "Entered uncorrect date" << endl;
+			delete g_ptr;
+			g_ptr = nullptr;
+		}
+		for (int i = 0;i < 5;i++)
+		{
+			memset(fields[i], 0, FIELDSIZE);
+		}
+		for (int i = 0;i < 3;i++)
+		{
+			date[i] = 0;
+		}
 	}
 	file.close();
 	delete[] s;
@@ -1077,4 +917,4 @@ void keeper::loadFromFile(char* name)
 		delete[] fields[i];
 	}
 	delete[] fields;
-}*/
+}

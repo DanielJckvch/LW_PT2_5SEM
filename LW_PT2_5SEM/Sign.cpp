@@ -5,106 +5,161 @@
 #define FIELDSIZE 15
 using namespace std;
 
-void sign::show(ostream& out)
-{
-	out << "Name:" << name << endl;
-	out << "Surname:" << surname << endl;
-	out << "Zodiac sign:" << zodiacSign << endl;
-	out << "Date of birth:" << birthDate[0] << '.' << birthDate[1] << '.' << birthDate[2] << endl;
-	out << endl;
-}
 sign::sign(void)
 {
 	//notuse
 	cout << "Calling the constructor in the \"Sign\" class" << endl;
 	name = surname = zodiacSign = nullptr;
 	birthDate = nullptr;
+	days = 0;
 }
-sign::sign(char* s1, char* s2, char* s3, short day, short month, short year):name(s1),surname(s2),zodiacSign(s3)
+sign::sign(char* s1, char* s2, char* s3, short day, short month, short year)
 {
 	cout << "Calling the constructor in the \"Sign\" class" << endl;
-	birthDate = new short[3];
+	try
+	{
+		if (!name)
+		{
+
+			name = new char[FIELDSIZE];
+
+		}
+		strcpy(name, s1);
+		if (!surname)
+		{
+
+			surname = new char[FIELDSIZE];
+
+		}
+		strcpy(surname, s2);
+		if (!zodiacSign)
+		{
+			zodiacSign = new char[FIELDSIZE];
+
+		}
+		strcpy(zodiacSign, s3);
+		if (!birthDate)
+		{
+			birthDate = new short[3];
+
+		}
+	}
+	catch (bad_alloc)
+	{
+		cout << "Error of the operator \"new\"" << endl;
+		exit(-1);
+	}
 	birthDate[0] = day;
 	birthDate[1] = month;
 	birthDate[2] = year;
+	days = 0;
 }
 sign::sign(const sign& toCopy)
 {
 	cout << "Calling the copy constructor in the \"Sign\" class" << endl;
-	if (toCopy.name)
+	try
 	{
-		try
+		if (toCopy.name)
 		{
+
 			name = new char[FIELDSIZE];
+			strcpy(name, toCopy.name);
 		}
-		catch (bad_alloc)
+		else
 		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
+			name = nullptr;
 		}
-		strcpy(name, toCopy.name);
-	}
-	else
-	{
-		name = nullptr;
-	}
-	if (toCopy.surname)
-	{
-		try
+		if (toCopy.surname)
 		{
+
 			surname = new char[FIELDSIZE];
+			strcpy(surname, toCopy.surname);
 		}
-		catch (bad_alloc)
+		else
 		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
+			surname = nullptr;
 		}
-		strcpy(surname, toCopy.surname);
-	}
-	else
-	{
-		surname = nullptr;
-	}
-	if (toCopy.zodiacSign)
-	{
-		try
+		if (toCopy.zodiacSign)
 		{
+
 			zodiacSign = new char[FIELDSIZE];
+			strcpy(zodiacSign, toCopy.zodiacSign);
 		}
-		catch (bad_alloc)
+		else
 		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
+			zodiacSign = nullptr;
 		}
-		strcpy(zodiacSign, toCopy.zodiacSign);
-	}
-	else
-	{
-		zodiacSign = nullptr;
-	}
-	if (toCopy.birthDate)
-	{
-		try
+		if (toCopy.birthDate)
 		{
+
 			birthDate = new short[3];
+			for (int i = 0;i < 3;i++)
+			{
+				birthDate[i] = toCopy.birthDate[i];
+			}
 		}
-		catch (bad_alloc)
+		else
 		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
-		}
-		for (int i = 0;i < 3;i++)
-		{
-			birthDate[i] = toCopy.birthDate[i];
+			birthDate = nullptr;
 		}
 	}
-	else
+	catch (bad_alloc)
 	{
-		birthDate = nullptr;
+		cout << "Error of the operator \"new\"" << endl;
+		exit(-1);
+	}
+	days = toCopy.days;
+}
+sign::~sign(void)
+{
+	cout << "Calling the destructor in the \"Sign\" class" << endl;
+	delete[] name;
+	delete[] surname;
+	delete[] zodiacSign;
+	delete[] birthDate;
+}
+void sign::countDays(void)
+{
+	days = birthDate[0];
+	for (int i = 0;i < birthDate[1];i++)
+	{
+		days += months[i];
+	}
+	days = days + birthDate[2] * 365;
+	
+}
+void sign::change(void)
+{
+	int chanProp;
+	char buffErr[] = "Error of the input buffer";
+	cout << "Original data: " << endl;
+	cout << endl;
+	cout << *(this);
+	cout << "Enter the number of note property to change: 1 - name, 2 - surname, 3 - zodiac sign, 4 - day of birth, 5 - month of birth, 6 - year of birth." << endl;
+	try
+	{
+		cin >> chanProp;
+		if (cin.bad() || cin.fail())
+		{
+			throw buffErr;
+		}
+	}
+	catch (char*)
+	{
+		exit(1);
+	}
+	chanProp--;
+	try
+	{
+		chanProp >> *(this);
+	}
+	catch (int)
+	{
+		cout << "Entered uncorrect date." << endl;
+		return;
 	}
 	
 }
-
 sign* sign::get(void)
 {
 	sign* new_ob;
@@ -129,6 +184,7 @@ char* sign::get(int propNum)
 		return surname;
 	case 2:
 		return zodiacSign;
+
 	}
 }
 short sign::getDate(int perNum)
@@ -137,188 +193,170 @@ short sign::getDate(int perNum)
 }
 void sign::set(char* s1, char* s2, char* s3, short day, short month, short year)
 {
-	if (!name)
+	try
 	{
-		try
+		if (!name)
 		{
-			name = new char[FIELDSIZE];
-		}
-		catch (bad_alloc)
-		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
-		}
-	}
-	strcpy(name, s1);
-	if (!surname)
-	{
-		try
-		{
-			surname = new char[FIELDSIZE];
-		}
-		catch (bad_alloc)
-		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
-		}
 
-	}
-	strcpy(surname, s2);
-	if (!zodiacSign)
-	{
-		try
+			name = new char[FIELDSIZE];
+
+		}
+		strcpy(name, s1);
+		if (!surname)
+		{
+
+			surname = new char[FIELDSIZE];
+
+		}
+		strcpy(surname, s2);
+		if (!zodiacSign)
 		{
 			zodiacSign = new char[FIELDSIZE];
-		}
-		catch (bad_alloc)
-		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
-		}
 
-	}
-	strcpy(zodiacSign, s3);
-	if (!birthDate)
-	{
-		try
+		}
+		strcpy(zodiacSign, s3);
+		if (!birthDate)
 		{
 			birthDate = new short[3];
+			
 		}
-		catch (bad_alloc)
-		{
-			cout << "Error of the operator \"new\"" << endl;
-			exit(-1);
-		}
-		
+	}
+	catch (bad_alloc)
+	{
+		cout << "Error of the operator \"new\"" << endl;
+		exit(-1);
 	}
 	birthDate[0] = day;
 	birthDate[1] = month;
 	birthDate[2] = year;
-	
 }
-sign::~sign(void)
+ostream& operator<<(ostream& out, sign& per)
 {
-	cout << "Calling the destructor in the \"Sign\" class" << endl;
-	delete[] name;
-	delete[] surname;
-	delete[] zodiacSign;
-	delete[] birthDate;
+	out << "Name:" << per.name << endl;
+	out << "Surname:" << per.surname << endl;
+	out << "Zodiac sign:" << per.zodiacSign << endl;
+	out << "Date of birth:" << per.birthDate[0] << '.' << per.birthDate[1] << '.' << per.birthDate[2] << endl;
+	out << endl;
+	return out;
 }
-void sign::change(void)
+void operator>>(int perNum, sign& per)
 {
-	int chanProp;
+	int errDate = 0;
+	short b = 0;
 	char buffErr[] = "Error of the input buffer";
-	cout << "Original data: " << endl;
-	cout << endl;
-	cout << "Name:" << name << endl;
-	cout << "Surname:" << surname << endl;
-	cout << "Zodiac sign:" << zodiacSign << endl;
-	cout << "Date of birth:" << birthDate[0]<<'.'<< birthDate[1] <<'.'<< birthDate[2] << endl;
-	cout << endl;
-	cout << "Enter the number of note property to change: 1 - name, 2 - surname, 3 - zodiac sign, 4 - day of birth, 5 - month of birth, 6 - year of birth." << endl;
+	try {
+		if (!per.name)
+		{
+
+			per.name = new char[FIELDSIZE];
+
+		}
+		if (!per.surname)
+		{
+
+			per.surname = new char[FIELDSIZE];
+
+		}
+		if (!per.zodiacSign)
+		{
+
+			per.zodiacSign = new char[FIELDSIZE];
+
+		}
+		if (!per.birthDate)
+		{
+
+			per.birthDate = new short[3];
+
+		}
+	}
+	catch (bad_alloc)
+	{
+		cout << "Error of the operator \"new\"" << endl;
+		exit(-1);
+	}
 	try
 	{
-		cin >> chanProp;
-		if (cin.bad() || cin.fail())
+		switch (perNum)
 		{
-			throw buffErr;
-		}
+		case 0:
+			cout << "Enter a name:" << endl;
+			cin >> per.name;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+			cout << endl;
+			break;
+		case 1:
+			cout << "Enter a surname:" << endl;
+			cin >> per.surname;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+			cout << endl;
+			break;
+		case 2:
+			cout << "Enter a zodiac sign:" << endl;
+			cin >> per.zodiacSign;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+			cout << endl;
+			break;
+		case 3:
+			cout << "Enter a day of birth:" << endl;
+			cin >> b;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+			if (b < 1 || b > 31)
+			{
+				throw errDate;
+			}
+			per.birthDate[0] = b;
+			cout << endl;
+			break;
+		case 4:
+			cout << "Enter a month of birth:" << endl;
+			cin >> b;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+			if (b < 1 || b > 12)
+			{
+				throw errDate;
+			}
+			per.birthDate[1] = b;
+			cout << endl;
+			break;
+		case 5:
+			cout << "Enter a year of birth:" << endl;
+			cin >> b;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+			if (b < 0)
+			{
+				throw errDate;
+			}
+			per.birthDate[2] = b;
+			break;
+		}	
 	}
 	catch (char*)
 	{
 		exit(1);
 	}
-	switch (chanProp)
-	{
-	case 1:
-		cout << "Enter a new name: " << endl;
-		try
-		{
-			cin >> name;
-			if (cin.bad() || cin.fail())
-			{
-				throw buffErr;
-			}
-		}
-		catch (char*)
-		{
-			exit(1);
-		}
-		break;
-	case 2:
-		cout << "Enter a new surname: " << endl;
-		try
-		{
-			cin >> surname;
-			if (cin.bad() || cin.fail())
-			{
-				throw buffErr;
-			}
-		}
-		catch (char*)
-		{
-			exit(1);
-		}
-		break;
-	case 3:
-		cout << "Enter a new zodiac sign: " << endl;
-		try
-		{
-			cin >> zodiacSign;
-			if (cin.bad() || cin.fail())
-			{
-				throw buffErr;
-			}
-		}
-		catch (char*)
-		{
-			exit(1);
-		}
-		break;
-	case 4:
-		cout << "Enter a new day of birth: " << endl;
-		try
-		{
-			cin >> birthDate[0];
-			if (cin.bad() || cin.fail())
-			{
-				throw buffErr;
-			}
-		}
-		catch (char*)
-		{
-			exit(1);
-		}
-		break;
-	case 5:
-		cout << "Enter a new month of birth: " << endl;
-		try
-		{
-			cin >> birthDate[1];
-			if (cin.bad() || cin.fail())
-			{
-				throw buffErr;
-			}
-		}
-		catch (char*)
-		{
-			exit(1);
-		}
-		break;
-	case 6:
-		cout << "Enter a new year of birth: " << endl;
-		try
-		{
-			cin >> birthDate[2];
-			if (cin.bad() || cin.fail())
-			{
-				throw buffErr;
-			}
-		}
-		catch (char*)
-		{
-			exit(1);
-		}
-		break;
-	}
+	
 }
+
+
+
+
+
