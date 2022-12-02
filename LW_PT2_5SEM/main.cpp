@@ -1,7 +1,9 @@
 ﻿#include <iostream>
+#include <fstream>
 #include "Keeper.h"
 //#include "Keeper.cpp"
 #define FIELDSIZE 20
+#define BUFLEN 5000
 using namespace std;
 /*
 Задание:
@@ -22,9 +24,10 @@ using namespace std;
 */
 
 //ОПТИМИЗАЦИЯ В ПОИСКЕ, ПРОВЕРКА ЗНАКА ЗОДИАКА, ПРОПУСКИ МЕЖДУ СТРОКАМИ, ВЫБОР СОРТ ВОЗРАС УБЫВАНИЕ, 
-//ПОСМОТРЕТЬ НА try-catch, проверка на пустой список в перегр операторе [] и sort()
+//ПОСМОТРЕТЬ НА try-catch, проверка на пустой список в перегр операторе [] и sort(), номера функций в switch-case части 1,
 
 void procSignList(void);
+void procSenten(void);
 
 int main(void)
 {
@@ -58,7 +61,7 @@ int main(void)
 			procSignList();
 			break;
 		case 2:
-			
+			procSenten();
 			break;
 		}
 
@@ -359,4 +362,108 @@ void procSignList(void)
 	
 	delete[] searchS;
 	delete[] filename;
+}
+
+void procSenten(void)
+{
+	char* buf;
+	char* filename;
+	char* s;
+	char* e;
+	char temp;
+	int senStart = 0;
+	int toLoad = 0;
+	ifstream inFile;
+	if (!inFile)
+	{
+		cout << "File opening error" << endl;
+		return;
+	}
+	char buffErr[] = "Error of the input buffer";
+	try
+	{
+		buf = new char[BUFLEN];
+		filename = new char[FIELDSIZE];
+	}
+	catch (bad_alloc)
+	{
+		cout << "Error of the operator \"new\"" << endl;
+		exit(-1);
+	}
+	cout << endl;
+	cout << "Enter a file name or path with name:" << endl;
+	try
+	{
+		cin >> filename;
+		if (cin.bad() || cin.fail())
+		{
+			throw buffErr;
+		}
+	}
+	catch (char*)
+	{
+		exit(1);
+	}
+	inFile.open(filename, ios::in);
+	inFile.get(buf, BUFLEN, EOF);
+	cout << "Sentences with \'?\' on end:" << endl;
+	cout << endl;
+	s = buf;
+	e = buf;
+	while (*e)
+	{
+		if (isupper(*e) && senStart)
+		{
+			s = e;
+			senStart = 0;
+		}
+		if (*e == '?')
+		{
+			temp = *(e + 1);
+			*(e + 1) = '\0';
+			cout << s;
+			cout << endl;
+			*(e + 1) = temp;
+			s = e + 1;
+			senStart = 1;
+		}
+		if (*e == '.' || *e == '!')
+		{
+			senStart = 1;
+		}
+		e++;
+	}
+	cout << endl;
+	cout << "Sentences with \'!\' on end:" << endl;
+	cout << endl;
+	s = buf;
+	e = buf;
+	while (*e)
+	{
+		if (isupper(*e) && senStart)
+		{
+			s = e;
+			senStart = 0;
+		}
+		if (*e == '!')
+		{
+			temp = *(e + 1);
+			*(e + 1) = '\0';
+			cout << s;
+			cout << endl;
+			*(e + 1) = temp;
+			s = e + 1;
+			senStart = 1;
+		}
+		if (*e == '.' || *e == '?')
+		{
+			senStart = 1;
+		}
+		e++;
+	}
+	
+	inFile.close();
+	delete[] buf;
+	delete[] filename;
+
 }

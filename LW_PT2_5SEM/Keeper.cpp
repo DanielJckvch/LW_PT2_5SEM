@@ -507,8 +507,8 @@ void keeper::loadFromFile(char* name)
 	{
 		s = new char[AUXSTRLEN];
 		lows = new char[AUXSTRLEN];
-		fields = new char* [5];
-		for (int i = 0;i < 5;i++)
+		fields = new char* [3];
+		for (int i = 0;i < 3;i++)
 		{
 			fields[i] = new char[FIELDSIZE];
 			memset(fields[i], 0, FIELDSIZE);
@@ -616,7 +616,7 @@ void keeper::loadFromFile(char* name)
 				g_ptr->set(fields[0], fields[1], fields[2], date[0], date[1], date[2]);
 				this->addToEnd(g_ptr);
 				g_ptr = nullptr;
-				for (int i = 0;i < 5;i++)
+				for (int i = 0;i < 3;i++)
 				{
 					memset(fields[i], 0, FIELDSIZE);
 				}
@@ -633,7 +633,7 @@ void keeper::loadFromFile(char* name)
 			cout << er << endl;
 			perF = 0;
 			t = 0;
-			for (int i = 0;i < 5;i++)
+			for (int i = 0;i < 3;i++)
 			{
 				memset(fields[i], 0, FIELDSIZE);
 			}
@@ -760,7 +760,7 @@ void keeper::loadFromFile(char* name)
 				g_ptr = nullptr;
 			}
 			
-			for (int i = 0;i < 5;i++)
+			for (int i = 0;i < 3;i++)
 			{
 				memset(fields[i], 0, FIELDSIZE);
 			}
@@ -900,7 +900,7 @@ void keeper::loadFromFile(char* name)
 			delete g_ptr;
 			g_ptr = nullptr;
 		}
-		for (int i = 0;i < 5;i++)
+		for (int i = 0;i < 3;i++)
 		{
 			memset(fields[i], 0, FIELDSIZE);
 		}
@@ -912,7 +912,7 @@ void keeper::loadFromFile(char* name)
 	file.close();
 	delete[] s;
 	delete[] lows;
-	for (int i = 0;i < 5;i++)
+	for (int i = 0;i < 3;i++)
 	{
 		delete[] fields[i];
 	}
