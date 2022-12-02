@@ -148,6 +148,11 @@ void sign::change(void)
 	{
 		exit(1);
 	}
+	if (chanProp < 0 || chanProp>6)
+	{
+		cout << "Entered uncorrect mode." << endl;
+		return;
+	}
 	chanProp--;
 	try
 	{

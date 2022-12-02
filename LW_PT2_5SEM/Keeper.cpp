@@ -107,7 +107,6 @@ void keeper::del(int num)
 	{
 		int er = 1;
 		throw er;
-		return;
 	}
 	if (num > amount || num <= 0)
 	{
@@ -255,12 +254,18 @@ void keeper::clear(void)
 	}
 	head->prev = nullptr;
 }
-void keeper::sort(void)
+void keeper::sort(int mode)
 {
 	place* p = head;
 	place* p1 = nullptr;
+	if (p->next == nullptr)
+	{
+		int er = 1;
+		throw er;
+	}
 	unsigned prev = 0;
 	bool exit = false;
+	mode = (!mode) ? -1 : 1;// mode = 0 - сорт по возрастанию, 1 - по убыванию
 	while (p->next != nullptr)
 	{
 		p->note->countDays();
@@ -275,7 +280,7 @@ void keeper::sort(void)
 		while (p1->next != nullptr)
 		{
 
-			if (p->note->days < p1->note->days) // если текущий элемент меньше предыдущего
+			if ((-1 * mode * p->note->days) > (-1 * mode * p1->note->days))
 			{
 				//Обмен
 				copy(j + 1, j);
@@ -421,6 +426,11 @@ istream& operator>>(istream& stream, keeper& cont)
 	catch (char*)
 	{
 		exit(1);
+	}
+	if (insMode < 0 || insMode>2)
+	{
+		cout << "Entered uncorrect mode. Element will be inserted in head." << endl;
+		insMode = 0;
 	}
 	switch (insMode)
 	{

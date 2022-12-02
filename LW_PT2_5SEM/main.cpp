@@ -1,7 +1,6 @@
 ﻿#include <iostream>
 #include <fstream>
 #include "Keeper.h"
-//#include "Keeper.cpp"
 #define FIELDSIZE 20
 #define BUFLEN 5000
 using namespace std;
@@ -22,15 +21,18 @@ using namespace std;
 2. Файловые и строковые потоки
 С использованием файловых и строковых потоков написать программу, которая считывает текст из файла и выводит на экран сначала вопросительные, а затем восклицательные предложения.
 */
-
-//ОПТИМИЗАЦИЯ В ПОИСКЕ, ПРОВЕРКА ЗНАКА ЗОДИАКА, ПРОПУСКИ МЕЖДУ СТРОКАМИ, ВЫБОР СОРТ ВОЗРАС УБЫВАНИЕ, 
-//ПОСМОТРЕТЬ НА try-catch, проверка на пустой список в перегр операторе [] и sort(), номера функций в switch-case части 1,
+ 
 
 void procSignList(void);
 void procSenten(void);
+bool passCheck(void);
 
 int main(void)
 {
+	if (!passCheck())
+	{
+		return 0;
+	}
 	int taskMode = 0;
 	char buffErr[] = "Error of the input buffer";
 	do
@@ -88,6 +90,7 @@ void procSignList(void)
 	keeper cont1;
 	int mode = 0;
 	int charMode = 0;
+	int sortMode = 0;
 	int num = 0;
 	int copied = 0;
 	int toCopy = 0;
@@ -95,7 +98,7 @@ void procSignList(void)
 	do
 	{
 		cout << endl;
-		cout << "Enter the processing mode: 0 - exit, 1 - add person data, 2 - sort records, 3 - , 4 - copy person\'s data, 5 - change person\'s data, 6 - delete person\'s data, 7 - clear the container, 8 - show all list, 9 - search for person by zodiac sign, 10 - search for person by another characteristic,  11 - load data to a file, 12 - load data from a file." << endl;
+		cout << "Enter the processing mode: 0 - exit, 1 - add person data, 2 - sort records, 3 - copy person\'s data, 4 - change person\'s data, 5 - delete person\'s data, 6 - clear the container, 7 - show all list, 8 - search for person by zodiac sign, 9 - search for person by another characteristic,  10 - load data to a file, 11 - load data from a file." << endl;
 		try
 		{
 			cin >> mode;
@@ -109,18 +112,40 @@ void procSignList(void)
 			exit(1);
 		}
 		cout << endl;
+		if (mode < 0 || mode>11)
+		{
+			cout << "Entered uncorrect mode. Try entering the mode number again." << endl;
+			continue;
+		}
 		switch (mode)
 		{
 		case 1:
 			cin >> cont1;
 			break;
 		case 2:
-			cont1.sort();
+			cout << "Enter a sort mode: 0 - in ascending order, 1 - in descending order." << endl;
+			try
+			{
+				cin >> sortMode;
+				if (cin.bad() || cin.fail())
+				{
+					throw buffErr;
+				}
+			}
+			catch (char*)
+			{
+				exit(1);
+			}
+			try 
+			{
+				cont1.sort(sortMode);
+			}
+			catch (int)
+			{
+				cout << "The list is empty" << endl;
+			}
 			break;
 		case 3:
-			
-			break;
-		case 4:
 			cout << "Enter a position of the copied element: " << endl;
 			try
 			{
@@ -156,7 +181,7 @@ void procSignList(void)
 				cout << "Copied element not found" << endl;
 			}
 			break;
-		case 5:
+		case 4:
 			cout << "Enter the number of the processed element." << endl;//Надо вставлять в keeper::changeEl по логике?
 			try
 			{
@@ -184,7 +209,7 @@ void procSignList(void)
 				cout << "Element not found" << endl;
 			}
 			break;
-		case 6:
+		case 5:
 			cout << "Enter number of deleting position." << endl;
 			try
 			{
@@ -211,17 +236,12 @@ void procSignList(void)
 			{
 				cout << "Element not found" << endl;
 			}
-
-			/*
-			keeper g2 = cont1;
-			g2.show();
-			int a = 5;*/
 			break;
-		case 7:
+		case 6:
 			cont1.clear();
 			cout << "The list is empty" << endl;
 			break;
-		case 8:
+		case 7:
 			try
 			{
 				cout << cont1;
@@ -231,7 +251,7 @@ void procSignList(void)
 				cout << "The list is empty" << endl;
 			}
 			break;
-		case 9:
+		case 8:
 			cout << "Enter zodiac sign for search: " << endl;
 			try
 			{
@@ -254,7 +274,7 @@ void procSignList(void)
 				cout << "The list is empty" << endl;
 			}
 			break;
-		case 10:
+		case 9:
 			cout << "Enter person\'s characteristic for search: 1 - name, 2 - surname, 3 - birth day, 4 - birth month, 5 - birth year." << endl;
 			try
 			{
@@ -267,6 +287,11 @@ void procSignList(void)
 			catch (char*)
 			{
 				exit(1);
+			}
+			if (charMode < 0 || charMode>11)
+			{
+				cout << "Entered uncorrect mode. Try entering the mode number again." << endl;
+				continue;
 			}
 			cout << "Enter key value: " << endl;
 			if (charMode < 3)
@@ -317,7 +342,7 @@ void procSignList(void)
 
 			}
 			break;
-		case 11:
+		case 10:
 			cout << "Enter a file name or path with name:" << endl;
 			try
 			{
@@ -333,7 +358,6 @@ void procSignList(void)
 			}
 			try
 			{
-				//garage.txt
 				cont1.loadToFile(filename);
 			}
 			catch (int)
@@ -341,7 +365,7 @@ void procSignList(void)
 				cout << "The list is empty" << endl;
 			}
 			break;
-		case 12:
+		case 11:
 			cout << "Enter a file name or path with name:" << endl;
 			try
 			{
@@ -374,6 +398,7 @@ void procSenten(void)
 	int senStart = 0;
 	int toLoad = 0;
 	ifstream inFile;
+	ofstream outFile;
 	if (!inFile)
 	{
 		cout << "File opening error" << endl;
@@ -461,9 +486,166 @@ void procSenten(void)
 		}
 		e++;
 	}
-	
+	cout << endl;
+	cout << "Load result in file? 0 - yes, 1 - no." << endl;
+	try
+	{
+		cin >> toLoad;
+		if (cin.bad() || cin.fail())
+		{
+			throw buffErr;
+		}
+	}
+	catch (char*)
+	{
+		exit(1);
+	}
+	if (!toLoad)
+	{
+		cout << endl;
+		cout << "Enter a file name or path with name:" << endl;
+		try
+		{
+			cin >> filename;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+		}
+		catch (char*)
+		{
+			exit(1);
+		}
+		outFile.open(filename, ios::out | ios::trunc);
+		outFile << "Sentences with \'?\' on end:" << endl;
+		outFile << endl;
+		s = buf;
+		e = buf;
+		while (*e)
+		{
+			if (isupper(*e) && senStart)
+			{
+				s = e;
+				senStart = 0;
+			}
+			if (*e == '?')
+			{
+				temp = *(e + 1);
+				*(e + 1) = '\0';
+				outFile << s;
+				outFile << endl;
+				*(e + 1) = temp;
+				s = e + 1;
+				senStart = 1;
+			}
+			if (*e == '.' || *e == '!')
+			{
+				senStart = 1;
+			}
+			e++;
+		}
+		outFile << endl;
+		outFile << "Sentences with \'!\' on end:" << endl;
+		outFile << endl;
+		s = buf;
+		e = buf;
+		while (*e)
+		{
+			if (isupper(*e) && senStart)
+			{
+				s = e;
+				senStart = 0;
+			}
+			if (*e == '!')
+			{
+				temp = *(e + 1);
+				*(e + 1) = '\0';
+				outFile << s;
+				outFile << endl;
+				*(e + 1) = temp;
+				s = e + 1;
+				senStart = 1;
+			}
+			if (*e == '.' || *e == '?')
+			{
+				senStart = 1;
+			}
+			e++;
+		}
+		outFile.close();
+	}
 	inFile.close();
 	delete[] buf;
 	delete[] filename;
 
+}
+
+bool passCheck(void)
+{
+	int attempts = 0;
+	int strLen = 20;
+	char* attStr = nullptr;
+	char* password = nullptr;
+	char* str = nullptr;
+	ifstream passFile("password.txt", ios::in);
+	char buffErr[] = "Error of the input buffer";
+	try
+	{
+		password = new char[strLen];
+		attStr = new char[strLen];
+		str = new char[strLen];
+	}
+	catch (bad_alloc)
+	{
+		cout << "Error of the operator \"new\"" << endl;
+		delete[] attStr;
+		delete[] password;
+		delete[] str;
+		return false;
+	}
+	if (!passFile)
+	{
+		cout << "File opening error" << endl;
+		delete[] attStr;
+		delete[] password;
+		delete[] str;
+		return false;
+	}
+	passFile.getline(password, 20);
+	passFile.getline(attStr, 20);
+	attempts = atoi(attStr);
+	while (attempts--)
+	{
+		cout << "Enter password: " << endl;
+		try
+		{
+			cin >> str;
+			if (cin.bad() || cin.fail())
+			{
+				throw buffErr;
+			}
+		}
+		catch (char*)
+		{
+			exit(1);
+		}
+		if (!strcmp(str, password))
+		{
+			cout << "The password is correct!" << endl;
+			passFile.close();
+			delete[] str;
+			delete[] password;
+			return true;
+		}
+		else if(attempts)
+		{
+			cout << "The password is not correct. You have " << attempts << " input attempts left." << endl;
+		}
+	}
+	cout << "Number of attempts completed." << endl;
+	delete[] attStr;
+	delete[] str;
+	delete[] password;
+	passFile.close();
+	return false;
 }

@@ -21,7 +21,7 @@ public:
 	void search(char* s, int f);
 	void search(int perVal, int perNum);
 	void clear(void);
-	void sort(void);
+	void sort(int mode = 0);
 	keeper();
 	keeper(sign* ob);
 	keeper(const keeper& ob);
