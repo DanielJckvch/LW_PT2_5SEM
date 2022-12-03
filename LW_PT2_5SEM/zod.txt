@@ -9,7 +9,7 @@ Date of birth:3.2.1900
 Name:Chris
 Surname:Williams
 Zodiac sign:Aries
-Date of birth:10.3.2100
+Date of birth:10.3.2000
 
 Name:Joe
 Surname:Smith
@@ -25,49 +25,4 @@ Name:Martin
 Surname:Wilson
 Zodiac sign:Aries
 Date of birth:10.3.2007
-
-Name:Gans
-Surname:Wehnn
-Zodiac sign:Sagittarius
-Date of birth:8.8.1978
-
-Name:Joe
-Surname:Smith
-Zodiac sign:Sagittarius
-Date of birth:10.8.1988
-
-Name:Dennis
-Surname:Hall
-Zodiac sign:Cancer
-Date of birth:3.2.1280
-
-Name:Gordon
-Surname:Scott
-Zodiac sign:Aries
-Date of birth:10.3.2120
-
-Name:Joe
-Surname:Smith
-Zodiac sign:Sagittarius
-Date of birth:8.10.2022
-
-Name:Claus
-Surname:Wenn
-Zodiac sign:Aries
-Date of birth:10.3.2007
-
-Name:Gans
-Surname:Wenn
-Zodiac sign:Sagittarius
-Date of birth:8.8.1988
-
-Name:Joe
-Surname:Smith
-Zodiac sign:Sagittarius
-Date of birth:9.8.1988
-
-Name:William
-Surname:Scott
-Zodiac sign:Aries
-Date of birth:3.3.2001
 

@@ -98,7 +98,7 @@ void procSignList(void)
 	do
 	{
 		cout << endl;
-		cout << "Enter the processing mode: 0 - exit, 1 - add person data, 2 - sort records, 3 - copy person\'s data, 4 - change person\'s data, 5 - delete person\'s data, 6 - clear the container, 7 - show all list, 8 - search for person by zodiac sign, 9 - search for person by another characteristic,  10 - load data to a file, 11 - load data from a file." << endl;
+		cout << "Enter the processing mode: 0 - exit, 1 - add person data, 2 - sort records, 3 - copy person\'s data, 4 - change person\'s data, 5 - delete person\'s data, 6 - clear the container, 7 - show all list, 8 - search for person by zodiac sign, 9 - search for person by another characteristic, 10 - load data to a file, 11 - load data from a file." << endl;
 		try
 		{
 			cin >> mode;
